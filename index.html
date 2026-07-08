@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TACTICAL RUCK COMPASS - PANDOLF ENGINE</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts for a clean, technical monospace look -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen p-4 md:p-8 selection:bg-emerald-500 selection:text-zinc-950">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- HEADER / HUD HEADER -->
+        <header class="border-b border-zinc-800 pb-4 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wider text-emerald-400">⚡ RUCK_ANALYST_v1.0</h1>
+                <p class="text-xs text-zinc-500 uppercase tracking-widest mt-1">USARIEM Pandolf Biomechanics Engine</p>
+            </div>
+            <div class="bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded text-xs text-emerald-500 font-bold uppercase tracking-wider animate-pulse">
+                System: Ready // Secure
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- LEFT COLUMN: OPERATIONAL INPUTS -->
+            <section class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-lg backdrop-blur-sm">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-6 border-b border-zinc-800 pb-2">// MISSION_PARAMETERS</h2>
+                
+                <div class="space-y-5">
+                    <!-- Weight & Load Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-bold">Body Weight (lbs)</label>
+                            <input type="number" id="weight" value="180" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-bold">Ruck Load (lbs)</label>
+                            <input type="number" id="load" value="45" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                    </div>
+
+                    <!-- Target Pace & Distance Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-bold">Pace (min/mile)</label>
+                            <input type="number" id="pace" value="15" step="0.5" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-bold">Distance (miles)</label>
+                            <input type="number" id="distance" value="6" step="0.1" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                    </div>
+
+                    <!-- Terrain Dropdown -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-zinc-400 mb-2 font-bold">Terrain Coefficient (η)</label>
+                        <select id="terrain" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-bold transition">
+                            <option value="1.0">Blacktop / Pavement [1.0]</option>
+                            <option value="1.2">Gravel / Dirt Trail [1.2]</option>
+                            <option value="1.5">Heavy Brush / Swamplands [1.5]</option>
+                            <option value="2.1">Soft Sand Dunes [2.1]</option>
+                        </select>
+                    </div>
+
+                    <!-- Grade Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs uppercase tracking-wider text-zinc-400 font-bold">Incline / Slope Grade</label>
+                            <span id="gradeValue" class="text-xs text-emerald-400 font-bold">0%</span>
+                        </div>
+                        <input type="range" id="grade" min="0" max="15" value="0" class="w-full accent-emerald-500 cursor-pointer">
+                    </div>
+
+                    <!-- ENGAGE BUTTON -->
+                    <button onclick="calculateMetrics()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-bold uppercase tracking-widest text-xs py-3 rounded transition cursor-pointer mt-4 active:scale-[0.99]">
+                        EXECUTE PANDOLF EQUATION
+                    </button>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: HUD READOUTS -->
+            <section class="flex flex-col gap-6">
+                
+                <!-- MAIN METRICS PANEL -->
+                <div class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-lg flex-1">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-6 border-b border-zinc-800 pb-2">// TARGET_METRICS_READOUT</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-zinc-950 border border-zinc-800 p-4 rounded">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Total Caloric Burn</p>
+                            <p id="outCalories" class="text-2xl font-bold text-emerald-400">-- <span class="text-xs text-zinc-500">kcal</span></p>
+                        </div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-4 rounded">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Burn Rate</p>
+                            <p id="outRate" class="text-2xl font-bold text-emerald-400">-- <span class="text-xs text-zinc-500">kcal/hr</span></p>
+                        </div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-4 rounded">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Est. Duration</p>
+                            <p id="outDuration" class="text-2xl font-bold text-emerald-400 font-mono">--:--</p>
+                        </div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-4 rounded">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Hydration Index</p>
+                            <p id="outHydration" class="text-2xl font-bold text-emerald-400">-- <span class="text-xs text-zinc-500">Liters</span></p>
+                        </div>
+                    </div>
+
+                    <!-- MECHE LOAD PENALTY READOUT -->
+                    <div class="bg-emerald-950/20 border border-emerald-900/50 p-4 rounded-lg">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">⚙️ MECHANICAL BIOMECHANICS INSIGHT</h3>
+                        <p id="outPenalty" class="text-xs text-zinc-400 leading-relaxed">
+                            Awaiting input array. Run parameters to analyze the kinetic load penalty applied by your dry pack weight.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PASSIVE SUPPORT MONETIZATION LINK -->
+                <footer class="bg-zinc-900/30 border border-dashed border-zinc-800 p-4 rounded-lg flex justify-between items-center text-xs">
+                    <span class="text-zinc-500">Independent Dev Stream</span>
+                    <a href="https://ko-fi.com" target="_blank" class="text-emerald-500 hover:text-emerald-400 font-bold underline transition uppercase tracking-wider">
+                        [ Buy Dev a Coffee ☕ ]
+                    </a>
+                </footer>
+
+            </section>
+        </div>
+    </div>
+
+    <!-- BRAIN CORE: THE MATHEMATICAL LOGIC -->
+    <script>
+        // Synchronize Slider Text Value
+        const gradeSlider = document.getElementById('grade');
+        const gradeValue = document.getElementById('gradeValue');
+        gradeSlider.addEventListener('input', () => {
+            gradeValue.textContent = gradeSlider.value + '%';
+        });
+
+        function calculateMetrics() {
+            // 1. Gather Inputs
+            const wLbs = parseFloat(document.getElementById('weight').value) || 0;
+            const lLbs = parseFloat(document.getElementById('load').value) || 0;
+            const pace = parseFloat(document.getElementById('pace').value) || 0;
+            const dist = parseFloat(document.getElementById('distance').value) || 0;
+            const eta = parseFloat(document.getElementById('terrain').value) || 1.0;
+            const G = parseFloat(gradeSlider.value) || 0;
+
+            if (wLbs <= 0 || pace <= 0 || dist <= 0) {
+                alert("CRITICAL ERROR: Invalid Input Vector.");
+                return;
+            }
+
+            // 2. Unit Conversions for Physics calculations
+            const W = wLbs * 0.453592; // lbs to kg
+            const L = lLbs * 0.453592; // lbs to kg
+            const speedMph = 60 / pace;
+            const V = speedMph * 0.44704; // mph to meters/second
+
+            // 3. Pandolf Equation Execution (Outputs Metabolic Power in Watts)
+            // M = 1.5W + 2.0(W+L)(L/W)^2 + eta(W+L)(1.5V^2 + 0.35VG)
+            const baseTerm = 1.5 * W;
+            const loadPenaltyTerm = 2.0 * (W + L) * Math.pow((L / W), 2);
+            const kineticTerm = eta * (W + L) * ((1.5 * Math.pow(V, 2)) + (0.35 * V * G));
+            
+            const totalWatts = baseTerm + loadPenaltyTerm + kineticTerm;
+
+            // 4. Convert Watts to kcal/hr (1 Watt = 0.8604 kcal/hr)
+            const kcalHr = totalWatts * 0.8604;
+            const durationHours = dist / speedMph;
+            const totalCalories = kcalHr * durationHours;
+
+            // 5. Calculate Load Penalty metrics (Isolate the metabolic cost of the ruck alone)
+            const unweightedWatts = (1.5 * W) + (eta * W * ((1.5 * Math.pow(V, 2)) + (0.35 * V * G)));
+            const unweightedKcalHr = unweightedWatts * 0.8604;
+            const penaltyKcalTotal = (kcalHr - unweightedKcalHr) * durationHours;
+            const percentIncrease = ((kcalHr - unweightedKcalHr) / unweightedKcalHr) * 100;
+
+            // 6. Hydration Index Calculation (Base metabolic water depletion rate)
+            const hydrationLiters = durationHours * (0.45 + (kcalHr / 1200) * 0.25);
+
+            // 7. Push Matrix Back to DOM Viewports
+            document.getElementById('outCalories').innerHTML = Math.round(totalCalories) + ' <span class="text-xs text-zinc-500">kcal</span>';
+            document.getElementById('outRate').innerHTML = Math.round(kcalHr) + ' <span class="text-xs text-zinc-500">kcal/hr</span>';
+            
+            // Format Duration Clock
+            const displayMinsTotal = Math.round(durationHours * 60);
+            const displayHrs = Math.floor(displayMinsTotal / 60);
+            const displayMins = displayMinsTotal % 60;
+            document.getElementById('outDuration').textContent = 
+                String(displayHrs).padStart(2, '0') + ':' + String(displayMins).padStart(2, '0');
+
+            document.getElementById('outHydration').innerHTML = hydrationLiters.toFixed(2) + ' <span class="text-xs text-zinc-500">Liters</span>';
+
+            // Custom MechE Insight Report Card
+            document.getElementById('outPenalty').innerHTML = 
+                `Adding a ${lLbs} lbs load increases your metabolic power requirement by <span class="text-emerald-400 font-bold">${percentIncrease.toFixed(1)}%</span> compared to an unweighted run. Your skeletal frame spent exactly <span class="text-emerald-400 font-bold">${Math.round(penaltyKcalTotal)} kcal</span> purely overcoming the physics of your pack's mass dead-weight.`;
+        }
+    </script>
+</body>
+</html>
